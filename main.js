@@ -1,7 +1,9 @@
+/* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 const Player = (name, marker, score, turn) => ({
   name, marker, score, turn,
 });
+
 const Gamelogic = (() => {
   const Gameboard = (() => {
     const board = [null, null, null, null, null, null, null, null, null];
@@ -9,7 +11,7 @@ const Gamelogic = (() => {
     const resetBoard = () => {
       for (let i = 0; i < board.length; i + 1) { board[i] = null; }
     };
-    const getTile = (index) => board[index];
+
     function setMaker(index, marker) {
       if (board[index] === null) {
         board[index] = marker;
@@ -19,7 +21,7 @@ const Gamelogic = (() => {
     }
 
     return {
-      board, getBoard, resetBoard, getTile, setMaker,
+      board, getBoard, resetBoard, setMaker,
     };
   })();
 
@@ -45,54 +47,51 @@ const Gamelogic = (() => {
       const board = Gameboard.getBoard;
       for (let i = 0; i <= 7; i++) {
         const winningCondition = winConditions[i];
-        const a = board[winningCondition[0]];
-        const b = board[winningCondition[1]];
-        const c = board[winningCondition[2]];
-        if (a === null || b === null || c === null) continue;
+        let a = board[winningCondition[0]];
+        let b = board[winningCondition[1]];
+        let c = board[winningCondition[2]];
+        if (a === null || b === null || c === null) { continue; }
+        if (a === b && b === c) {
+          return board[a];
+        }
+        return null;
       }
-      if (a === b && b === c) {
-        const a = board[winningCondition[0]];
-        const b = board[winningCondition[1]];
-        let c;
-        return board[a];
-      }
-      return null;
-    };
 
-    const checkForWinner = function () {
-      let winner = null;
-      if (win === playerOne.marker) {
-        winner = playerOne;
-      } else if (win === playerTwo.marker) {
-        winner = playerTwo;
-      } else return winner;
-    };
+      const checkForWinner = function () {
+        let winner = null;
+        if (win === playerOne.marker) {
+          winner = playerOne;
+        } else if (win === playerTwo.marker) {
+          winner = playerTwo;
+        } else return winner;
+      };
 
-    const checkForDraw = function () {
+      const checkForDraw = function () {
       // check each element in the gameboard array.
       // if each element != null -> board full
       // if board full ->
-      const board = Gameboard.getBoard;
-      if (board.includes(null)) {
-        return false;
-      }
-      return true;
-    };
-
-    const checkRoundEnds = function () {
-      if (checkForDraw === true) {
-        return true;
-      }
-      if (checkForDraw === false) {
-        const winResult = checkForWinner;
-        if (winResult != null) {
-          return winResult;
+        const board = Gameboard.getBoard;
+        if (board.includes(null)) {
+          return false;
         }
-        return false;
-      }
-    };
+        return true;
+      };
 
-    return { checkForWinner, checkForDraw, checkRoundEnds };
+      const checkRoundEnds = function () {
+        if (checkForDraw === true) {
+          return true;
+        }
+        if (checkForDraw === false) {
+          const winResult = checkForWinner;
+          if (winResult != null) {
+            return winResult;
+          }
+          return false;
+        }
+      };
+
+      return { checkForWinner, checkForDraw, checkRoundEnds };
+    };
   })();
 
   const Gameplay = (() => {
@@ -121,9 +120,10 @@ const Gamelogic = (() => {
     };
 
     const playTurn = function () {
+      const choice = DisplayController.getTileId;
       const player = getCurrentPlayer;
-      const choice = prompt('Make your choice');
       Gameboard.setMaker(choice, player.marker);
+      DisplayController.updateTileMarker(choice, player);
     };
 
     const newRound = function () {
@@ -132,7 +132,7 @@ const Gamelogic = (() => {
     };
 
     const playRound = function () {
-      playTurn;
+      playTurn();
       const roundEnd = WinChecker.checkRoundEnds;
       if (roundEnd === true) {
         incrementScore(playerOne);
@@ -140,7 +140,7 @@ const Gamelogic = (() => {
         return newRound;
       }
       if (roundEnd === false) {
-        switchPlayerTurn;
+        switchPlayerTurn();
       } else {
         if (roundEnd === playerOne) {
           incrementScore(playerOne);
@@ -150,16 +150,46 @@ const Gamelogic = (() => {
         return newRound;
       }
     };
-    return { playRound };
+    return { playTurn };
   })();
 
   const Scoreboard = (() => {
     const getPlayerScore = (player) => player.score;
+
+    return { getPlayerScore };
   })();
 
-  const DisplayController = (()=>{
-    
+  const DisplayController = (() => {
+    const getTileId = () => {
+      const position = document.querySelector('.grid-container');
+      position.addEventListener('click', (e) => {
+        const tileId = e.target.id;
+        return tileId;
+      });
+    };
+    // get board id
+    const updateTileMarker = (i, player) => {
+      document.getElementById(i).innerText = player.marker;
+    };
+    // update board
+    const getPlayerScoreId = (i) => document.getElementById(`score-${i}`);
 
-
-  }())
+    const updateScore = (player) => {
+      let i;
+      if (player === playerOne) {
+        i = 1;
+      } else {
+        i = 2;
+      }
+      const previousScore = getPlayerScoreId(i);
+      previousScore.innerText = player.score;
+    };
+    return {
+      updateScore, updateTileMarker, getPlayerScoreId, getTileId,
+    };
+  }
+  )();
+  { return Gameplay.playTurn; }
 })();
+
+Gamelogic();
