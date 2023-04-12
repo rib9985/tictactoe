@@ -1,0 +1,59 @@
+:root{
+    font-family: sans-serif;
+}
+
+
+.scoreboard{
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    padding: 10px;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.score-container{
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.grid-container{
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: repeat(3,auto );
+    grid-template-rows: repeat(3,auto );
+    font-size: 5rem;
+    
+}
+
+.grid-container>div{
+    width: 5rem;
+    height: 5rem;
+    border: 2px;
+    border-style: solid;
+    padding: 10px;
+    text-align: center;
+    text-justify: center;
+    justify-content: center;
+    align-self: center;
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#score-2, #score-1, .versus{
+    font-size: 3rem;
+}
