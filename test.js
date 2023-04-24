@@ -6,9 +6,9 @@ const playerOne = Player('playerOne', 'x', 0, true);
 const playerTwo = Player('playerTwo', 'o', 0, false);
 
 const Gameboard = (() => {
-  const board = ['o', 'x', 'x',
-    'x', 'x', 'o',
-    'x', 'o', 'o'];
+  const board = ['', '', '',
+    '', '', '',
+    '', '', ''];
   const getBoard = () => board;
   const resetBoard = () => {
     for (let i = 0; i < board.length; i + 1) { board[i] = null; }
@@ -27,23 +27,23 @@ const Gameboard = (() => {
   };
 })();
 
-const winConditions = [
-  // horizontal
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  // vertical
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  // diagonal
-  [0, 4, 8],
-  [2, 4, 6],
-];
-
 const win = (function () {
   // eslint-disable-next-line prefer-destructuring
   const board = Gameboard.board;
+
+  const winConditions = [
+    // horizontal
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    // vertical
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    // diagonal
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
 
   const hasWon = () => {
     for (let i = 0; i <= 7; i++) {
