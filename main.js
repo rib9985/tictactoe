@@ -13,10 +13,10 @@ const Gamelogic = (() => {
     const getBoard = () => board;
 
     const resetBoard = () => {
-      for (let i = 0; i < board.length; i + 1) { board[i] = null; }
+      for (let i = 0; i < board.length; i++) { board[i] = null; }
     };
 
-    function setMaker(index, marker) {
+    function setMarker(index, marker) {
       if (board[index] === null) {
         board[index] = marker;
         return console.log(`Set ${marker} at ${board[index]}`);
@@ -25,50 +25,12 @@ const Gamelogic = (() => {
     }
 
     return {
-      board, getBoard, resetBoard, setMaker,
+      board, getBoard, resetBoard, setMarker,
     };
   })();
 
   const playerOne = Player('playerOne', 'x', 0, true);
   const playerTwo = Player('playerTwo', 'o', 0, false);
-
-  const DisplayController = (() => {
-    // get board id
-    const getTileId = function () {
-      const selectDocument = document.querySelector('.grid-container');
-      return selectDocument.addEventListener('click', (e) => e.target.id);
-    };
-
-    // Change the text inside HTML on click
-    const changeInnerText = function (id, player) {
-      let element = document.getElementById(id);
-      let innerText = element.innerHTML;
-
-      if ((innerText === null) || (innerText === '')) {
-        console.log(player.marker);
-        innerText = player.marker;
-        element.innerHTML = innerText;
-        return id;
-      }
-      console.log('this move is not valid');
-      return null;
-    };
-
-    const getPlayerScoreId = (i) => document.getElementById(`score-${i}`);
-
-    const updateScore = (player) => {
-      let i;
-      if (player === playerOne) {
-        i = 1;
-      } else {
-        i = 2;
-      }
-      const previousScore = getPlayerScoreId(i);
-      previousScore.innerText = player.score;
-    };
-
-    return { changeInnerText, getTileId };
-  })();
 
   const Gameplay = (() => {
     const round = 1;
@@ -102,35 +64,41 @@ const Gamelogic = (() => {
       playerTwo.turn = false;
     };
 
-    const playTurn = function () {
-      const choice = DisplayController.getTileId();
-      const player = getCurrentPlayer();
-      Gameboard.setMaker(choice, player.marker);
-      DisplayController.changeInnerText(choice, player);
+    const playTurn = function (id) {
+      let player = getCurrentPlayer();
+      let makePlay = DisplayController.changeInnerText(id, player);
+      if (makePlay != null) {
+        Gameboard.setMarker(makePlay, player.marker);
+        console.log(Gameboard.board);
+        return true;
+      } return null;
     };
 
     const newRound = function () {
       incrementRound();
       Gameboard.resetBoard();
+      DisplayController.resetBoardDisplay();
       resetPlayersTurn();
     };
 
-    const playRound = function () {
-      playTurn();
-      const roundEnd = WinChecker.checkRoundEnds();
-      if (roundEnd === true) {
-        incrementScore(playerOne);
-        incrementScore(playerTwo);
-        return;
-      }
-      if (roundEnd === false) {
-        switchPlayerTurn();
-        playTurn();
-      } else if (roundEnd === playerOne) {
-        return incrementScore(playerOne);
-      } else if (roundEnd === playerTwo) {
-        return incrementScore(playerTwo);
-      }
+    const playRound = function (id) {
+      const turnWasPlayed = playTurn(id);
+      if (turnWasPlayed === true) {
+        const roundEnd = WinChecker.checkRoundEnds();
+        if (roundEnd === true) {
+          newRound();
+          return;
+        }
+        if (roundEnd === false) {
+          switchPlayerTurn();
+        } else if (roundEnd === playerOne) {
+          incrementScore(playerOne);
+          newRound();
+        } else if (roundEnd === playerTwo) {
+          incrementScore(playerTwo);
+          newRound();
+        }
+      } else { console.log('playRound is invalid, null returned'); }
     };
     return { playRound, newRound };
   })();
@@ -159,7 +127,7 @@ const Gamelogic = (() => {
         const a = board[winningCondition[0]];
         const b = board[winningCondition[1]];
         const c = board[winningCondition[2]];
-        if (a === null || b === null || c === null) { continue; } else if (a === b && b === c) {
+        if (a === null || b === null || c === null) { continue; } else if (a === b && b === c && c === a) {
           console.log(`Winner is ${a}`);
           return a;
         } else continue;
@@ -182,9 +150,6 @@ const Gamelogic = (() => {
     };
 
     const checkForDraw = function () {
-      // check each element in the gameboard array.
-      // if each element != null -> board full
-      // if board full ->
       if (board.includes(null)) {
         return false;
       }
@@ -221,4 +186,48 @@ const Gamelogic = (() => {
   return (Gameplay);
 })();
 
-Gamelogic.Gameplay();
+const DisplayController = (() => {
+  const selectDocument = document.querySelector('.grid-container');
+  selectDocument.addEventListener('click', (e) => {
+    clickHandler(e);
+  });
+  const clickHandler = function (e) {
+    const tileId = e.target.id;
+    Gamelogic.playRound(tileId);
+  };
+
+  // Change the text inside HTML on click
+  const changeInnerText = function (id, player) {
+    let element = document.getElementById(id);
+    let innerText = element.innerHTML;
+
+    if ((innerText === null) || (innerText === '')) {
+      console.log(player.marker);
+      innerText = player.marker;
+      element.innerHTML = innerText;
+      return id;
+    }
+    console.log('this move is not valid');
+    return null;
+  };
+
+  const resetBoardDisplay = function () {
+    document.querySelectorAll('.board').forEach((board) => {
+      board.innerText = null;
+    });
+  };
+
+  const getPlayerScoreId = (i) => document.getElementById(`score-${i}`);
+
+  const updateScore = (player) => {
+    let i;
+    if (player === playerOne) {
+      i = 1;
+    } else {
+      i = 2;
+    }
+    const previousScore = getPlayerScoreId(i);
+    previousScore.innerText = player.score;
+  };
+  return { changeInnerText, resetBoardDisplay };
+})();
