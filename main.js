@@ -33,10 +33,10 @@ const Gamelogic = (() => {
   const playerTwo = Player('playerTwo', 'o', 0, false);
 
   const Gameplay = (() => {
-    const round = 1;
+    let round = 1;
 
-    const incrementRound = () => round + 1;
-    const incrementScore = (player) => player.score + 1;
+    const incrementRound = () => round += 1;
+    const incrementScore = (player) => player.score += 1;
 
     const getCurrentPlayer = function () {
       if (playerOne.turn === true) {
@@ -78,25 +78,37 @@ const Gamelogic = (() => {
       incrementRound();
       Gameboard.resetBoard();
       DisplayController.resetBoardDisplay();
+      DisplayController.updateMessageBoard(4);
       resetPlayersTurn();
     };
+
+    const newRoundWithTimeout = () => setTimeout(newRound, 5000);
 
     const playRound = function (id) {
       const turnWasPlayed = playTurn(id);
       if (turnWasPlayed === true) {
         const roundEnd = WinChecker.checkRoundEnds();
         if (roundEnd === true) {
-          newRound();
+          DisplayController.updateMessageBoard(3);
+          DisplayController.updateRoundDisplay(round);
+          newRoundWithTimeout();
+
           return;
         }
         if (roundEnd === false) {
           switchPlayerTurn();
         } else if (roundEnd === playerOne) {
           incrementScore(playerOne);
-          newRound();
+          DisplayController.updateMessageBoard(1);
+          DisplayController.updateScore(playerOne);
+          DisplayController.updateRoundDisplay(round);
+          newRoundWithTimeout();
         } else if (roundEnd === playerTwo) {
           incrementScore(playerTwo);
-          newRound();
+          DisplayController.updateMessageBoard(2);
+          DisplayController.updateScore(playerTwo);
+          DisplayController.updateRoundDisplay(round);
+          newRoundWithTimeout();
         }
       } else { console.log('playRound is invalid, null returned'); }
     };
@@ -132,6 +144,7 @@ const Gamelogic = (() => {
           return a;
         } else continue;
       }
+      return null;
     };
 
     const checkForWinner = function () {
@@ -158,8 +171,10 @@ const Gamelogic = (() => {
 
     const checkRoundEnds = function () {
       if (checkForDraw() === true) {
-        console.log('Round was a Draw!');
-        return true;
+        console.log('Final Check');
+        const winResult = checkForWinner();
+        if (winResult === null) { return true; }
+        return winResult;
       }
       if (checkForDraw() === false) {
         const winResult = checkForWinner();
@@ -191,6 +206,9 @@ const DisplayController = (() => {
   selectDocument.addEventListener('click', (e) => {
     clickHandler(e);
   });
+
+  let messageBoard = document.getElementById('message');
+
   const clickHandler = function (e) {
     const tileId = e.target.id;
     Gamelogic.playRound(tileId);
@@ -221,13 +239,33 @@ const DisplayController = (() => {
 
   const updateScore = (player) => {
     let i;
-    if (player === playerOne) {
+    if (player.marker === 'x') {
       i = 1;
     } else {
       i = 2;
     }
     const previousScore = getPlayerScoreId(i);
-    previousScore.innerText = player.score;
+    previousScore.innerHTML = player.score;
   };
-  return { changeInnerText, resetBoardDisplay };
+
+  const updateMessageBoard = function (id) {
+    if (id === 1) {
+      messageBoard.innerHTML = 'Player One Wins';
+    } if (id === 2) {
+      messageBoard.innerHTML = 'Player Two Wins';
+    } if (id === 3) {
+      messageBoard.innerHTML = 'Its a Draw!';
+    } if (id === 4) {
+      messageBoard.innerHTML = '';
+    }
+  };
+
+  const updateRoundDisplay = function (number) {
+    let round = document.getElementById('round-number');
+    round.innerHTML = number;
+  };
+
+  return {
+    changeInnerText, resetBoardDisplay, updateScore, updateMessageBoard, updateRoundDisplay,
+  };
 })();
