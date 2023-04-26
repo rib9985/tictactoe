@@ -193,11 +193,6 @@ const Gamelogic = (() => {
     };
   })();
 
-  const Scoreboard = (() => {
-    const getPlayerScore = (player) => player.score;
-
-    return { getPlayerScore };
-  })();
   return (Gameplay);
 })();
 
