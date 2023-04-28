@@ -181,7 +181,7 @@ const Gamelogic = (() => {
       const turnWasPlayed = playTurn(id);
       if (turnWasPlayed) {
         const roundEnd = WinChecker.checkRoundEnds();
-        if (roundEnd) {
+        if (roundEnd === true) {
           DisplayController.updateMessageBoard(3);
           DisplayController.updateRoundDisplay(round);
           DisplayController.deactivateBoardClick();
