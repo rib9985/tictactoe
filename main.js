@@ -7,12 +7,12 @@ const Player = (name, marker, score, turn) => ({
 const DisplayController = (() => {
   const startButton = document.getElementById('start');
 
-  const selectDocument = document.querySelector('.grid-container');
+  const selectBoard = document.querySelectorAll('.board');
 
   let messageBoard = document.getElementById('message');
 
-  const clickHandler = function (e) {
-    const tileId = e.target.id;
+  const clickHandler = function (event) {
+    const tileId = event.target.id;
     Gamelogic.playRound(tileId);
   };
 
@@ -28,7 +28,7 @@ const DisplayController = (() => {
       return id;
     }
     console.log('this move is not valid');
-    return null;
+    return false;
   };
 
   const resetBoardDisplay = function () {
@@ -68,14 +68,14 @@ const DisplayController = (() => {
   };
 
   const deactivateBoardClick = () => {
-    selectDocument.removeEventListener('click', (e) => {
-      clickHandler(e);
+    selectBoard.forEach((board) => {
+      board.removeEventListener('click', clickHandler);
     });
   };
 
   const activateBoard = () => {
-    selectDocument.addEventListener('click', (e) => {
-      clickHandler(e);
+    selectBoard.forEach((board) => {
+      board.addEventListener('click', clickHandler);
     });
   };
   startButton.onclick = activateBoard;
@@ -153,11 +153,15 @@ const Gamelogic = (() => {
     const playTurn = function (id) {
       let player = getCurrentPlayer();
       let makePlay = DisplayController.changeInnerText(id, player);
-      if (makePlay != null) {
+      if (makePlay !== false) {
         Gameboard.setMarker(makePlay, player.marker);
         console.log(Gameboard.board);
         return true;
-      } return null;
+      }
+      if (makePlay === false) {
+        console.log('returning false');
+        return false;
+      }
     };
 
     const newRound = function () {
@@ -166,6 +170,7 @@ const Gamelogic = (() => {
       DisplayController.resetBoardDisplay();
       DisplayController.updateMessageBoard(4);
       resetPlayersTurn();
+      DisplayController.activateBoard();
     };
 
     const newRoundWithTimeout = () => setTimeout(() => {
@@ -174,32 +179,30 @@ const Gamelogic = (() => {
 
     const playRound = function (id) {
       const turnWasPlayed = playTurn(id);
-      if (turnWasPlayed === true) {
+      if (turnWasPlayed) {
         const roundEnd = WinChecker.checkRoundEnds();
-        if (roundEnd === true) {
+        if (roundEnd) {
           DisplayController.updateMessageBoard(3);
           DisplayController.updateRoundDisplay(round);
           DisplayController.deactivateBoardClick();
-          return;
-        }
-        if (roundEnd === false) {
+        } else if (roundEnd === false) {
           switchPlayerTurn();
         } else if (roundEnd === playerOne) {
           incrementScore(playerOne);
           DisplayController.updateMessageBoard(1);
           DisplayController.updateScore(playerOne);
           DisplayController.updateRoundDisplay(round);
+          DisplayController.deactivateBoardClick();
           newRoundWithTimeout();
-          return DisplayController.deactivateBoardClick();
         } else if (roundEnd === playerTwo) {
           incrementScore(playerTwo);
           DisplayController.updateMessageBoard(2);
           DisplayController.updateScore(playerTwo);
           DisplayController.updateRoundDisplay(round);
+          DisplayController.deactivateBoardClick();
           newRoundWithTimeout();
-          return DisplayController.deactivateBoardClick();
         }
-      } else { console.log('playRound is invalid, null returned'); }
+      } else { console.log('playRound is invalid, playTurn returned false'); }
     };
     return { playRound, newRound };
   })();
