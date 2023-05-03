@@ -175,7 +175,7 @@ const Gamelogic = (() => {
 
     const newRoundWithTimeout = () => setTimeout(() => {
       newRound();
-    }, 5000);
+    }, 2000);
 
     const playRound = function (id) {
       const turnWasPlayed = playTurn(id);
@@ -185,6 +185,7 @@ const Gamelogic = (() => {
           DisplayController.updateMessageBoard(3);
           DisplayController.updateRoundDisplay(round);
           DisplayController.deactivateBoardClick();
+          newRoundWithTimeout();
         } else if (roundEnd === false) {
           switchPlayerTurn();
         } else if (roundEnd === playerOne) {
