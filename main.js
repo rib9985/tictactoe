@@ -4,6 +4,92 @@ const Player = (name, marker, score, turn) => ({
   name, marker, score, turn,
 });
 
+const DisplayController = (() => {
+  const startButton = document.getElementById('start');
+
+  const selectBoard = document.querySelectorAll('.board');
+
+  let messageBoard = document.getElementById('message');
+
+  const clickHandler = function (event) {
+    const tileId = event.target.id;
+    Gamelogic.playRound(tileId);
+  };
+
+  // Change the text inside HTML on click
+  const changeInnerText = function (id, player) {
+    let element = document.getElementById(id);
+    let innerText = element.innerHTML;
+
+    if ((innerText === null) || (innerText === '')) {
+      console.log(player.marker);
+      innerText = player.marker;
+      element.innerHTML = innerText;
+      return id;
+    }
+    console.log('this move is not valid');
+    return false;
+  };
+
+  const resetBoardDisplay = function () {
+    document.querySelectorAll('.board').forEach((board) => {
+      board.innerText = null;
+    });
+  };
+
+  const getPlayerScoreId = (i) => document.getElementById(`score-${i}`);
+
+  const updateScore = (player) => {
+    let i;
+    if (player.marker === 'x') {
+      i = 1;
+    } else {
+      i = 2;
+    }
+    const previousScore = getPlayerScoreId(i);
+    previousScore.innerHTML = player.score;
+  };
+
+  const updateMessageBoard = function (id) {
+    if (id === 1) {
+      messageBoard.innerHTML = 'Player One Wins';
+    } if (id === 2) {
+      messageBoard.innerHTML = 'Player Two Wins';
+    } if (id === 3) {
+      messageBoard.innerHTML = 'Its a Draw!';
+    } if (id === 4) {
+      messageBoard.innerHTML = '';
+    }
+  };
+
+  const updateRoundDisplay = function (number) {
+    let round = document.getElementById('round-number');
+    round.innerHTML = number;
+  };
+
+  const deactivateBoardClick = () => {
+    selectBoard.forEach((board) => {
+      board.removeEventListener('click', clickHandler);
+    });
+  };
+
+  const activateBoard = () => {
+    selectBoard.forEach((board) => {
+      board.addEventListener('click', clickHandler);
+    });
+  };
+  startButton.onclick = activateBoard;
+  return {
+    activateBoard,
+    deactivateBoardClick,
+    changeInnerText,
+    resetBoardDisplay,
+    updateScore,
+    updateMessageBoard,
+    updateRoundDisplay,
+  };
+})();
+
 const Gamelogic = (() => {
   const Gameboard = (() => {
     const board = [null, null, null,
@@ -67,11 +153,15 @@ const Gamelogic = (() => {
     const playTurn = function (id) {
       let player = getCurrentPlayer();
       let makePlay = DisplayController.changeInnerText(id, player);
-      if (makePlay != null) {
+      if (makePlay !== false) {
         Gameboard.setMarker(makePlay, player.marker);
         console.log(Gameboard.board);
         return true;
-      } return null;
+      }
+      if (makePlay === false) {
+        console.log('returning false');
+        return false;
+      }
     };
 
     const newRound = function () {
@@ -80,37 +170,40 @@ const Gamelogic = (() => {
       DisplayController.resetBoardDisplay();
       DisplayController.updateMessageBoard(4);
       resetPlayersTurn();
+      DisplayController.activateBoard();
     };
 
-    const newRoundWithTimeout = () => setTimeout(newRound, 5000);
+    const newRoundWithTimeout = () => setTimeout(() => {
+      newRound();
+    }, 2000);
 
     const playRound = function (id) {
       const turnWasPlayed = playTurn(id);
-      if (turnWasPlayed === true) {
+      if (turnWasPlayed) {
         const roundEnd = WinChecker.checkRoundEnds();
         if (roundEnd === true) {
           DisplayController.updateMessageBoard(3);
           DisplayController.updateRoundDisplay(round);
+          DisplayController.deactivateBoardClick();
           newRoundWithTimeout();
-
-          return;
-        }
-        if (roundEnd === false) {
+        } else if (roundEnd === false) {
           switchPlayerTurn();
         } else if (roundEnd === playerOne) {
           incrementScore(playerOne);
           DisplayController.updateMessageBoard(1);
           DisplayController.updateScore(playerOne);
           DisplayController.updateRoundDisplay(round);
+          DisplayController.deactivateBoardClick();
           newRoundWithTimeout();
         } else if (roundEnd === playerTwo) {
           incrementScore(playerTwo);
           DisplayController.updateMessageBoard(2);
           DisplayController.updateScore(playerTwo);
           DisplayController.updateRoundDisplay(round);
+          DisplayController.deactivateBoardClick();
           newRoundWithTimeout();
         }
-      } else { console.log('playRound is invalid, null returned'); }
+      } else { console.log('playRound is invalid, playTurn returned false'); }
     };
     return { playRound, newRound };
   })();
@@ -194,73 +287,4 @@ const Gamelogic = (() => {
   })();
 
   return (Gameplay);
-})();
-
-const DisplayController = (() => {
-  const selectDocument = document.querySelector('.grid-container');
-  selectDocument.addEventListener('click', (e) => {
-    clickHandler(e);
-  });
-
-  let messageBoard = document.getElementById('message');
-
-  const clickHandler = function (e) {
-    const tileId = e.target.id;
-    Gamelogic.playRound(tileId);
-  };
-
-  // Change the text inside HTML on click
-  const changeInnerText = function (id, player) {
-    let element = document.getElementById(id);
-    let innerText = element.innerHTML;
-
-    if ((innerText === null) || (innerText === '')) {
-      console.log(player.marker);
-      innerText = player.marker;
-      element.innerHTML = innerText;
-      return id;
-    }
-    console.log('this move is not valid');
-    return null;
-  };
-
-  const resetBoardDisplay = function () {
-    document.querySelectorAll('.board').forEach((board) => {
-      board.innerText = null;
-    });
-  };
-
-  const getPlayerScoreId = (i) => document.getElementById(`score-${i}`);
-
-  const updateScore = (player) => {
-    let i;
-    if (player.marker === 'x') {
-      i = 1;
-    } else {
-      i = 2;
-    }
-    const previousScore = getPlayerScoreId(i);
-    previousScore.innerHTML = player.score;
-  };
-
-  const updateMessageBoard = function (id) {
-    if (id === 1) {
-      messageBoard.innerHTML = 'Player One Wins';
-    } if (id === 2) {
-      messageBoard.innerHTML = 'Player Two Wins';
-    } if (id === 3) {
-      messageBoard.innerHTML = 'Its a Draw!';
-    } if (id === 4) {
-      messageBoard.innerHTML = '';
-    }
-  };
-
-  const updateRoundDisplay = function (number) {
-    let round = document.getElementById('round-number');
-    round.innerHTML = number;
-  };
-
-  return {
-    changeInnerText, resetBoardDisplay, updateScore, updateMessageBoard, updateRoundDisplay,
-  };
 })();
