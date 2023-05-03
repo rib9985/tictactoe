@@ -150,6 +150,22 @@ const Gamelogic = (() => {
       playerTwo.turn = false;
     };
 
+    const secondPlayerPlays = function (isAi, id, player) {
+      let decision = null;
+      console.log('Second player will make decision');
+      if (isAi === true) {
+        console.log('The player is an AI, running the minimax algo');
+        decision = minimax();
+      } else {
+        decision = DisplayController.changeInnerText(id, player);
+      }
+      return decision;
+    };
+
+    const minimax = function () {
+
+    };
+
     const playTurn = function (id) {
       let player = getCurrentPlayer();
       let makePlay = DisplayController.changeInnerText(id, player);
