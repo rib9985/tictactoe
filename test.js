@@ -102,12 +102,13 @@ const Gamelogic = (() => {
       for (let i = 0; i < board.length; i++) { board[i] = null; }
     };
 
-    function setMarker(index, marker) {
-      if (board[index] === null) {
-        board[index] = marker;
-        return console.log(`Set ${marker} at ${board[index]}`);
+    function setMarker(typeOfBoard, index, marker) {
+      if (typeOfBoard[index] === null) {
+        typeOfBoard[index] = marker;
+        console.log(`Set ${marker} at ${typeOfBoard[index]}`);
+        return true;
       }
-      return console.log('Invalid Move');
+      return false;
     }
 
     return {
@@ -150,27 +151,39 @@ const Gamelogic = (() => {
       playerTwo.turn = false;
     };
 
-    const secondPlayerPlays = function (isAi, id, player) {
-      let decision = null;
-      console.log('Second player will make decision');
-      if (isAi === true) {
-        console.log('The player is an AI, running the minimax algo');
-        decision = minimax();
-      } else {
-        decision = DisplayController.changeInnerText(id, player);
-      }
-      return decision;
+    const isAi = function () {
+      return true;
     };
 
-    const minimax = function () {
+    const bestMove = function () {
+      const testerGameboard = Gameboard.board;
+      let bestScore = -Infinity;
+      for (let i = 0; i < 9; i++) {
+        if (Gameboard.setMarker(testerGameboard, i, playerTwo.marker) === true) {
+          let score = minimax();
+          if (score > bestScore) {
+            bestScore = score;
+            return i;
+          }
+        }
+      }
+    };
 
+    const minimax = function (board, depth, maximize) {
+      // first check a win condition:
+      return 1;
     };
 
     const playTurn = function (id) {
       let player = getCurrentPlayer();
-      let makePlay = DisplayController.changeInnerText(id, player);
+      let makePlay;
+      if (player === playerOne) {
+        makePlay = DisplayController.changeInnerText(id, playerOne);
+      } else if (player === playerTwo) {
+        makePlay = DisplayController.changeInnerText(id, playerTwo);
+      }
       if (makePlay !== false) {
-        Gameboard.setMarker(makePlay, player.marker);
+        Gameboard.setMarker(Gameboard.board, makePlay, player.marker);
         console.log(Gameboard.board);
         return true;
       }
@@ -196,14 +209,17 @@ const Gamelogic = (() => {
     const playRound = function (id) {
       const turnWasPlayed = playTurn(id);
       if (turnWasPlayed) {
-        const roundEnd = WinChecker.checkRoundEnds();
-        if (roundEnd === true) {
+        const roundEnd = WinChecker.checkRoundEnds(Gameboard.board);
+        if (roundEnd === false) {
+          switchPlayerTurn();
+          if (getCurrentPlayer() === playerTwo && isAi() === true) {
+            playRound(bestMove());
+          } console.log('player not AI');
+        } else if (roundEnd === true) {
           DisplayController.updateMessageBoard(3);
           DisplayController.updateRoundDisplay(round);
           DisplayController.deactivateBoardClick();
           newRoundWithTimeout();
-        } else if (roundEnd === false) {
-          switchPlayerTurn();
         } else if (roundEnd === playerOne) {
           incrementScore(playerOne);
           DisplayController.updateMessageBoard(1);
@@ -226,7 +242,7 @@ const Gamelogic = (() => {
 
   const WinChecker = (() => {
     // eslint-disable-next-line prefer-destructuring
-    const board = Gameboard.board;
+    const playingBoard = Gameboard.board;
 
     const winConditions = [
       // horizontal
@@ -242,7 +258,7 @@ const Gamelogic = (() => {
       [2, 4, 6],
     ];
 
-    const hasWon = () => {
+    const hasWon = (board) => {
       for (let i = 0; i <= 7; i++) {
         const winningCondition = winConditions[i];
         const a = board[winningCondition[0]];
@@ -256,8 +272,8 @@ const Gamelogic = (() => {
       return null;
     };
 
-    const checkForWinner = function () {
-      const hasWonChecker = hasWon();
+    const checkForWinner = function (board) {
+      const hasWonChecker = hasWon(board);
       let winner = null;
       if (hasWonChecker === playerOne.marker) {
         winner = playerOne;
@@ -271,22 +287,22 @@ const Gamelogic = (() => {
       return winner;
     };
 
-    const checkForDraw = function () {
+    const checkForDraw = function (board) {
       if (board.includes(null)) {
         return false;
       }
       return true;
     };
 
-    const checkRoundEnds = function () {
-      if (checkForDraw() === true) {
+    const checkRoundEnds = function (board) {
+      if (checkForDraw(board) === true) {
         console.log('Final Check');
-        const winResult = checkForWinner();
+        const winResult = checkForWinner(board);
         if (winResult === null) { return true; }
         return winResult;
       }
-      if (checkForDraw() === false) {
-        const winResult = checkForWinner();
+      if (checkForDraw(board) === false) {
+        const winResult = checkForWinner(board);
 
         if (winResult != null) {
           console.log(`The Winner is ${winResult.name}`);
@@ -298,7 +314,7 @@ const Gamelogic = (() => {
     };
 
     return {
-      checkRoundEnds,
+      checkRoundEnds, hasWon,
     };
   })();
 
