@@ -101,7 +101,15 @@ const Gamelogic = (() => {
     const resetBoard = () => {
       for (let i = 0; i < board.length; i++) { board[i] = null; }
     };
-
+    const checkEmptySpaces = (board) => {
+      const emptySpace = [];
+      board.forEach((element, index) => {
+        if (element === null) {
+          emptySpace.push(index);
+        }
+      });
+      return emptySpace;
+    };
     function setMarker(typeOfBoard, index, marker) {
       if (typeOfBoard[index] === null) {
         typeOfBoard[index] = marker;
@@ -111,8 +119,12 @@ const Gamelogic = (() => {
       return false;
     }
 
+    const undoMarker = function (board, index) {
+      board[index] = null;
+    };
+
     return {
-      board, getBoard, resetBoard, setMarker,
+      board, getBoard, resetBoard, setMarker, undoMarker, checkEmptySpaces,
     };
   })();
 
@@ -156,22 +168,74 @@ const Gamelogic = (() => {
     };
 
     const bestMove = function () {
-      const testerGameboard = Gameboard.board;
+      const testerGameboard = Gameboard.board.map((x) => x);
       let bestScore = -Infinity;
-      for (let i = 0; i < 9; i++) {
-        if (Gameboard.setMarker(testerGameboard, i, playerTwo.marker) === true) {
-          let score = minimax();
+      const availableMoves = Gameboard.checkEmptySpaces(testerGameboard);
+      let choosenMove;
+      for (let i = 0; i < availableMoves.length; i++) { // loop through all the board
+        if (Gameboard.setMarker(testerGameboard, availableMoves[i], playerTwo.marker) === true) {
+          let score = minimax(testerGameboard, 0, false, -Infinity, +Infinity, 0);
+          Gameboard.undoMarker(testerGameboard, availableMoves[i]);
           if (score > bestScore) {
             bestScore = score;
-            return i;
+            choosenMove = availableMoves[i];
           }
         }
       }
+      return choosenMove;
     };
 
-    const minimax = function (board, depth, maximize) {
-      // first check a win condition:
-      return 1;
+    const minimax = function (board, depth, isMaximizing, alpha, beta, totalIterations) {
+      // check for terminal end state
+      let result = WinChecker.checkRoundEnds(board);
+      console.log(`$Evaluating at ${depth} at ${totalIterations}`);
+      if (result !== false) {
+        if (result === playerOne) {
+          let score = +10 - depth;
+          console.log('Player One has Won');
+          return score;
+        }
+        if (result === playerTwo) {
+          let score = -10 + depth;
+          console.log('Player Two has Won');
+          return score;
+        }
+        let score = 0;
+        return score;
+      }
+
+      const availableMoves = Gameboard.checkEmptySpaces(board);
+      if (isMaximizing === true) {
+        let bestScore = +Infinity;
+        for (let i = 0; i < availableMoves.length; i++) {
+          if (Gameboard.setMarker(board, availableMoves[i], playerTwo.marker) === true) {
+            let score = minimax(board, depth + 1, false, alpha, beta, totalIterations + 1);
+            Gameboard.undoMarker(board, availableMoves[i]);
+            bestScore = Math.min(score, bestScore);
+            alpha = Math.min(alpha, score);
+            if (beta <= alpha) {
+              break;
+            }
+          }
+        }
+        return bestScore;
+      }
+
+      if (isMaximizing === false) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < availableMoves.length; i++) {
+          if (Gameboard.setMarker(board, availableMoves[i], playerOne.marker) === true) {
+            let score = minimax(board, depth + 1, true, alpha, beta, totalIterations + 1);
+            Gameboard.undoMarker(board, availableMoves[i]);
+            bestScore = Math.max(score, bestScore);
+            beta = Math.max(beta, score);
+            if (beta <= alpha) {
+              break;
+            }
+          }
+        }
+        return bestScore;
+      }
     };
 
     const playTurn = function (id) {
@@ -296,7 +360,6 @@ const Gamelogic = (() => {
 
     const checkRoundEnds = function (board) {
       if (checkForDraw(board) === true) {
-        console.log('Final Check');
         const winResult = checkForWinner(board);
         if (winResult === null) { return true; }
         return winResult;
@@ -314,7 +377,7 @@ const Gamelogic = (() => {
     };
 
     return {
-      checkRoundEnds, hasWon,
+      checkRoundEnds, checkForWinner,
     };
   })();
 
