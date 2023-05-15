@@ -1,7 +1,40 @@
-:root{
-    font-family: sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300;400;500;600;700&display=swap');
 
+
+:root {
+    background-color: var(--background-color);
+
+	--background-color: #282a36;
+	--main-color: #44475a;
+	--main-color-darker: #2f3036;
+	--foreground-color: #f8f8f2;
+	--cyan: #8be9fd;
+	--green: #50fa7b;
+	--orange: #ffb86c;
+	--pink: #ff79c6;
+	--purple: #bd93f9;
+	--red: #ff5555;
+	--yellow: #f1fa8c;
+
+	--title-font: 'Bree Serif';
+	--content-font: Dongle;
+	--menu-font: Signika Negative;
+}
+#round-number{
+    color: var(--orange);
+    font-family: var(--content-font);
+    font-size: 3rem;;
+
+}
+.game-title{
+    font-family: var(--title-font);
+    font-size: 2rem;
+    gap:1rem;
+    padding: 20px;
+    color: var(--pink)
+}
 
 .scoreboard{
     display: flex;
@@ -10,6 +43,9 @@
     padding: 10px;
     justify-content: center;
     align-items: center;
+    font-family: var(--content-font);
+    font-size: 2rem;
+    color: var(--main-color)
     
 }
 
@@ -18,8 +54,18 @@
     align-items: center;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 2px;
     padding: 10px;
+}
+
+.player-descript{
+    font-size: 1.5rem;
+}
+
+#score-1,#score-2{
+    font-family: var(--menu-font);
+    font-size: 5rem;
+    color: var(--green);
 }
 
 .grid-container{
@@ -32,20 +78,44 @@
     grid-template-columns: repeat(3,auto );
     grid-template-rows: repeat(3,auto );
     font-size: 5rem;
+    border: none;
     
 }
 
 .grid-container>div{
     width: 5rem;
     height: 5rem;
-    border: 2px;
     border-style: solid;
+    border-radius: 3px;
     padding: 10px;
     text-align: center;
     text-justify: center;
     justify-content: center;
     align-self: center;
+    color: var(--cyan);
+    font-style: var(--menu-font);
 }
+
+.nt{
+    border-top:0;
+}
+.nl{
+    border-left: 0
+}
+
+.nb{
+    border-bottom: 0;
+}
+
+.nr{
+    border-right: 0;
+}
+
+.board:hover{
+    background-color: var(--main-color-darker);
+}
+
+
 
 .container{
     display: flex;
@@ -63,9 +133,10 @@
 .versus{
     padding-top: 1rem;
     width: 2rem;
-    font-size: 2rem;
+    font-size: 4rem;
     text-align: center;
     justify-content: flex-end;
+    color: var(--red)
 }
 
 #buttons-container{
@@ -75,3 +146,52 @@
     flex-direction: row;
     gap: 1rem;
 }
+
+#message{
+    padding:20px;
+    color:#f1fa8c;
+    font-family: var(--menu-font)
+}
+
+button{
+    padding:10px;
+    color:#f1fa8c;
+    font-family: var(--menu-font);
+    background-color: var(--main-color);
+    border-radius: 20px;
+    border-style: none;
+}
+
+button:hover, select:hover{
+    padding:10px;
+    color:#f1fa8c;
+    font-family: var(--menu-font);
+    background-color: var(--main-color-darker);
+    border-radius: 20px;
+    border-style: none;
+}
+
+button:active{
+    padding:5px;
+    color:#f1fa8c;
+    font-family: var(--menu-font);
+    background-color: var(--main-color-darker);
+    border-radius: 20px;
+    border-style: none;
+}
+
+select{
+    padding:5px;
+    color:#f1fa8c;
+    color:#f1fa8c;
+    font-family: var(--menu-font);
+    background-color: var(--main-color-darker);
+    border-radius: 20px;
+    border-style: none;
+    outline: none;
+}
+
+select:focus, select:active{
+    background-color: var(--main-color);
+}
+
