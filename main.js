@@ -196,13 +196,21 @@ const Gamelogic = (() => {
       }
     };
 
-    const newRound = function () {
-      incrementRound();
-      Gameboard.resetBoard();
-      DisplayController.resetBoardDisplay();
-      DisplayController.updateMessageBoard(4);
-      resetPlayersTurn();
-      DisplayController.activateBoard();
+    const newRound = function (shouldIncrement) {
+      if (shouldIncrement === false) {
+        Gameboard.resetBoard();
+        DisplayController.resetBoardDisplay();
+        DisplayController.updateMessageBoard(4);
+        resetPlayersTurn();
+        DisplayController.activateBoard();
+      } else {
+        incrementRound();
+        Gameboard.resetBoard();
+        DisplayController.resetBoardDisplay();
+        DisplayController.updateMessageBoard(4);
+        resetPlayersTurn();
+        DisplayController.activateBoard();
+      }
     };
 
     const newRoundWithTimeout = () => setTimeout(() => {
@@ -330,7 +338,7 @@ const DisplayController = (() => {
 
   const restartButton = document.getElementById('restart');
   restartButton.onclick = () => {
-    Gamelogic.newRound();
+    Gamelogic.newRound(false);
     updateRoundDisplay(Gamelogic.getCurrentRound());
   };
 
@@ -409,7 +417,7 @@ const DisplayController = (() => {
   const aiSelector = document.getElementById('ai');
   const returnAiDifficulty = () => aiSelector.value;
   aiSelector.addEventListener('change', () => {
-    Gamelogic.newRound();
+    Gamelogic.newRound(false);
     updateRoundDisplay(Gamelogic.getCurrentRound());
   });
 
