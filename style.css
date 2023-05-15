@@ -5,6 +5,8 @@
 
 :root {
     background-color: var(--background-color);
+    font-family: var(--menu-font);
+
 
 	--background-color: #282a36;
 	--main-color: #44475a;
@@ -194,4 +196,3 @@ select{
 select:focus, select:active{
     background-color: var(--main-color);
 }
-
