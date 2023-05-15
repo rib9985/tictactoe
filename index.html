@@ -1,58 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe</title>
-    <script src="main.js" defer></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Tic Tac Toe</title>
+		<script src="main.js" defer></script>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="game-title">Tic Tac Toe</div>
+			<div id="buttons-container">
+				<form>
+					<select name="AI Difficulty" id="ai">
+						<option value="easy">Easy</option>
+						<option value="medium">Medium</option>
+						<option value="hard">Hard</option>
+					</select>
+				</form>
+				<button id="start">Start Game</button>
+				<button id="restart">Restart</button>
+			</div>
+			<div id="message">Press Start to Play, Restart to restart Round</div>
+			<div id="round-number">Round 1</div>
+			<div class="scoreboard">
+				<div class="score-container">
+					<div class="player-descript">Player 1 is Marker X</div>
+					<div id="score-1">0</div>
+				</div>
 
-   
-    <div class="container">
-        <div class="game-title">Tic Tac Toe</div>
-        <div id="buttons-container">
-            <form>
-                <select name="AI Difficulty" id="ai">
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
-            </form>
-            <button id="start">Start Game</button>
-            <button id="restart">Restart</button>
-        </div>
-        <div id="message">Press Start to Play, Restart to restart Round</div>
-            <div id="round-number">Round 1</div>
-        <div class="scoreboard">
-            <div class="score-container">
-                <div class = 'player-descript'>Player 1 is Marker X</div>
-                <div id="score-1">0</div>
-        </div>
-        
-            <div class="versus">X</div>
-            <div class="score-container">
-                <div class = 'player-descript' >Player 2 is Marker O</div>
-                <div id="score-2">0</div>
-            </div>
-            
-        </div>
-        
+				<div class="versus">X</div>
+				<div class="score-container">
+					<div class="player-descript">Player 2 is Marker O</div>
+					<div id="score-2">0</div>
+				</div>
+			</div>
 
-
-        <div class="grid-container">
-            <div class="board nt nl" id="0" ></div>
-            <div class="board nt" id="1"></div>
-            <div class="board nt nr" id="2"></div>
-            <div class="board nl" id="3"></div>
-            <div class="board" id="4"></div>
-            <div class="board nr" id="5"></div>
-            <div class="board nb nl" id="6"></div>
-            <div class="board nb " id="7"></div>
-            <div class="board nb nr" id="8"></div>
-        </div>
-    </div>
-</body>
+			<div class="grid-container">
+				<div class="board nt nl" id="0"></div>
+				<div class="board nt" id="1"></div>
+				<div class="board nt nr" id="2"></div>
+				<div class="board nl" id="3"></div>
+				<div class="board" id="4"></div>
+				<div class="board nr" id="5"></div>
+				<div class="board nb nl" id="6"></div>
+				<div class="board nb" id="7"></div>
+				<div class="board nb nr" id="8"></div>
+			</div>
+		</div>
+	</body>
 </html>
