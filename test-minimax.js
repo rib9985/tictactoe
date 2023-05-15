@@ -4,92 +4,6 @@ const Player = (name, marker, score, turn) => ({
   name, marker, score, turn,
 });
 
-const DisplayController = (() => {
-  const startButton = document.getElementById('start');
-
-  const selectBoard = document.querySelectorAll('.board');
-
-  let messageBoard = document.getElementById('message');
-
-  const clickHandler = function (event) {
-    const tileId = event.target.id;
-    Gamelogic.playRound(tileId);
-  };
-
-  // Change the text inside HTML on click
-  const changeInnerText = function (id, player) {
-    let element = document.getElementById(id);
-    let innerText = element.innerHTML;
-
-    if ((innerText === null) || (innerText === '')) {
-      console.log(player.marker);
-      innerText = player.marker;
-      element.innerHTML = innerText;
-      return id;
-    }
-    console.log('this move is not valid');
-    return false;
-  };
-
-  const resetBoardDisplay = function () {
-    document.querySelectorAll('.board').forEach((board) => {
-      board.innerText = null;
-    });
-  };
-
-  const getPlayerScoreId = (i) => document.getElementById(`score-${i}`);
-
-  const updateScore = (player) => {
-    let i;
-    if (player.marker === 'x') {
-      i = 1;
-    } else {
-      i = 2;
-    }
-    const previousScore = getPlayerScoreId(i);
-    previousScore.innerHTML = player.score;
-  };
-
-  const updateMessageBoard = function (id) {
-    if (id === 1) {
-      messageBoard.innerHTML = 'Player One Wins';
-    } if (id === 2) {
-      messageBoard.innerHTML = 'Player Two Wins';
-    } if (id === 3) {
-      messageBoard.innerHTML = 'Its a Draw!';
-    } if (id === 4) {
-      messageBoard.innerHTML = '';
-    }
-  };
-
-  const updateRoundDisplay = function (number) {
-    let round = document.getElementById('round-number');
-    round.innerHTML = number;
-  };
-
-  const deactivateBoardClick = () => {
-    selectBoard.forEach((board) => {
-      board.removeEventListener('click', clickHandler);
-    });
-  };
-
-  const activateBoard = () => {
-    selectBoard.forEach((board) => {
-      board.addEventListener('click', clickHandler);
-    });
-  };
-  startButton.onclick = activateBoard;
-  return {
-    activateBoard,
-    deactivateBoardClick,
-    changeInnerText,
-    resetBoardDisplay,
-    updateScore,
-    updateMessageBoard,
-    updateRoundDisplay,
-  };
-})();
-
 const Gamelogic = (() => {
   const Gameboard = (() => {
     const board = [null, null, null,
@@ -132,35 +46,17 @@ const Gamelogic = (() => {
   const playerTwo = Player('playerTwo', 'o', 0, false);
 
   const Gameplay = (() => {
-    let round = 1;
-
-    const incrementRound = () => round += 1;
-    const incrementScore = (player) => player.score += 1;
-
-    const getCurrentPlayer = function () {
-      if (playerOne.turn === true) {
-        return playerOne;
+    const getAiPrecision = function () {
+      const difficulty = DisplayController.returnAiDifficulty();
+      if (difficulty === 'easy') {
+        return 20;
       }
-      return playerTwo;
-    };
-
-    const getNextPlayer = function () {
-      if (playerOne.turn === false) {
-        return playerOne;
+      if (difficulty === 'medium') {
+        return 51;
       }
-      return playerTwo;
-    };
-
-    const switchPlayerTurn = function () {
-      let player = getCurrentPlayer();
-      let playerNext = getNextPlayer();
-      player.turn = false;
-      playerNext.turn = true;
-    };
-
-    const resetPlayersTurn = function () {
-      playerOne.turn = true;
-      playerTwo.turn = false;
+      if (difficulty === 'hard') {
+        return 100;
+      }
     };
 
     const isAi = function () {
@@ -169,10 +65,18 @@ const Gamelogic = (() => {
 
     const bestMove = function () {
       const testerGameboard = Gameboard.board.map((x) => x);
-      let fc = 0; // create a copy of the current board
-      const choosenMove = minimax(testerGameboard, 0, playerTwo, -Infinity, Infinity);
-      console.log(`The chosen move is ${choosenMove.index}`); // the minimax function will be self contained
-      return choosenMove.index; // must be an index of the array
+      const aiPrecision = getAiPrecision();
+      const aiChoice = Math.max(Math.floor(Math.random() * 99), aiPrecision);
+
+      if (aiChoice > 50) {
+        console.log('choose minimax');
+        const choosenMove = minimax(testerGameboard, 0, playerTwo, -Infinity, Infinity);
+        return choosenMove.index;
+      }
+      console.log('choose random');
+      const availableMoves = Gameboard.checkEmptySpaces(testerGameboard);
+      const randomIndex = Math.floor(Math.random() * availableMoves.length);
+      return availableMoves[randomIndex];
     };
 
     const minimax = function (board, depth, player, alpha, beta) {
@@ -242,6 +146,37 @@ const Gamelogic = (() => {
       return moves[bestMove];
     };
 
+    let round = 1;
+    const getCurrentRound = () => round;
+    const incrementRound = () => round += 1;
+    const incrementScore = (player) => player.score += 1;
+
+    const getCurrentPlayer = function () {
+      if (playerOne.turn === true) {
+        return playerOne;
+      }
+      return playerTwo;
+    };
+
+    const getNextPlayer = function () {
+      if (playerOne.turn === false) {
+        return playerOne;
+      }
+      return playerTwo;
+    };
+
+    const switchPlayerTurn = function () {
+      let player = getCurrentPlayer();
+      let playerNext = getNextPlayer();
+      player.turn = false;
+      playerNext.turn = true;
+    };
+
+    const resetPlayersTurn = function () {
+      playerOne.turn = true;
+      playerTwo.turn = false;
+    };
+
     const playTurn = function (id) {
       let player = getCurrentPlayer();
       let makePlay;
@@ -305,7 +240,9 @@ const Gamelogic = (() => {
         }
       } else { console.log('playRound is invalid, playTurn returned false'); }
     };
-    return { playRound, newRound };
+    return {
+      playRound, newRound, getCurrentRound, getAiPrecision,
+    };
   })();
 
   const WinChecker = (() => {
@@ -386,4 +323,106 @@ const Gamelogic = (() => {
   })();
 
   return (Gameplay);
+})();
+
+const DisplayController = (() => {
+  const startButton = document.getElementById('start');
+
+  const restartButton = document.getElementById('restart');
+  restartButton.onclick = () => {
+    Gamelogic.newRound();
+    updateRoundDisplay(Gamelogic.getCurrentRound());
+  };
+
+  const selectBoard = document.querySelectorAll('.board');
+
+  let messageBoard = document.getElementById('message');
+
+  const clickHandler = function (event) {
+    const tileId = event.target.id;
+    Gamelogic.playRound(tileId);
+  };
+  // Change the text inside HTML on click
+  const changeInnerText = function (id, player) {
+    let element = document.getElementById(id);
+    let innerText = element.innerHTML;
+
+    if ((innerText === null) || (innerText === '')) {
+      console.log(player.marker);
+      innerText = player.marker;
+      element.innerHTML = innerText;
+      return id;
+    }
+    console.log('this move is not valid');
+    return false;
+  };
+
+  const resetBoardDisplay = function () {
+    document.querySelectorAll('.board').forEach((board) => {
+      board.innerText = null;
+    });
+  };
+
+  const getPlayerScoreId = (i) => document.getElementById(`score-${i}`);
+
+  const updateScore = (player) => {
+    let i;
+    if (player.marker === 'x') {
+      i = 1;
+    } else {
+      i = 2;
+    }
+    const previousScore = getPlayerScoreId(i);
+    previousScore.innerHTML = player.score;
+  };
+
+  const updateMessageBoard = function (id) {
+    if (id === 1) {
+      messageBoard.innerHTML = 'Player One Wins';
+    } if (id === 2) {
+      messageBoard.innerHTML = 'Player Two Wins';
+    } if (id === 3) {
+      messageBoard.innerHTML = 'Its a Draw!';
+    } if (id === 4) {
+      messageBoard.innerHTML = '';
+    }
+  };
+
+  const updateRoundDisplay = function (number) {
+    let round = document.getElementById('round-number');
+    round.innerHTML = `Round ${number}`;
+  };
+
+  const deactivateBoardClick = () => {
+    selectBoard.forEach((board) => {
+      board.removeEventListener('click', clickHandler);
+    });
+  };
+
+  const activateBoard = () => {
+    selectBoard.forEach((board) => {
+      board.addEventListener('click', clickHandler);
+    });
+  };
+  startButton.onclick = activateBoard;
+
+  const aiSelector = document.getElementById('ai');
+  const returnAiDifficulty = () => aiSelector.value;
+  aiSelector.addEventListener('change', () => {
+    Gamelogic.newRound();
+    updateRoundDisplay(Gamelogic.getCurrentRound());
+  });
+
+  return {
+    activateBoard,
+    deactivateBoardClick,
+    changeInnerText,
+    resetBoardDisplay,
+    updateScore,
+    updateMessageBoard,
+    updateRoundDisplay,
+    aiSelector,
+    restartButton,
+    returnAiDifficulty,
+  };
 })();

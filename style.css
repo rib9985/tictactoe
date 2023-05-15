@@ -67,3 +67,11 @@
     text-align: center;
     justify-content: flex-end;
 }
+
+#buttons-container{
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
