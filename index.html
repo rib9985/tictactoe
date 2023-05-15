@@ -29,7 +29,20 @@
             
         </div>
         <div id="message"></div>
-        <button id="start">Start Game</button>
+        
+        <div id="buttons-container">
+            <form>
+                <select name="AI Difficulty" id="ai">
+                    <option value="aiEasy">No AI</option>
+                    <option value="aiEasy">Easy</option>
+                    <option value="aiMedium">Medium</option>
+                    <option value="aiHard">Hard</option>
+                </select>
+            </form>
+            <button id="start">Start Game</button>
+            <button id="start">Restart Round</button>
+        </div>
+
         <div class="grid-container">
             <div class="board" id="0"></div>
             <div class="board" id="1"></div>
